@@ -1,4 +1,5 @@
 <?php
+$token_ekomobi = "";
 $q = str_replace("-"," ",$_GET["q"]);
 if (empty($q)) {
 $q = 'Mobil';	
@@ -140,7 +141,7 @@ $string = '{jual|menjual} '.ucwords($q).' {dengan|bersama|dgn} {tarif|bayaran|bi
 				<p class="desc">Produk ini Dijual Di : Bukalapak</p>
 		</figcaption>
 		<div class="bottom-wrap">
-				<a href="http://go.ecotrackings.com/?token=jtOD4qKnccctQrsDPZPbd&url='.myUrlEncode($bl_array['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
+				<a href="http://go.ecotrackings.com/?token='.$token_ekomobi.'&url='.myUrlEncode($bl_array['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
 				<div class="price-wrap h5">
 					<span class="price-new">'.rupiah($bl_array['products'][$x]['price']).'</span>
 				</div> <!-- price-wrap.// -->
