@@ -5,12 +5,13 @@ if(!isset($_SESSION['UserData']['Username'])){
 	exit;
 }
 ?>
-
+<title>Sitemap List</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 <!------ Include the above in your HEAD tag ---------->
-<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <nav class="navbar navbar-default navbar-static-top">
 	<div class="container-fluid">
 		<!-- Brand and toggle get grouped for better mobile display -->
@@ -34,76 +35,40 @@ if(!isset($_SESSION['UserData']['Username'])){
 	<div class="container-fluid main-container">
 		<div class="col-md-2 sidebar">
 			<ul class="nav nav-pills nav-stacked">
-				<li class="active"><a href="/admin/">Sitemap Maker</a></li>
-				<li><a href="/admin/sitemap.php">Sitemap List</a></li>
+				<li><a href="/admin/">Sitemap Maker</a></li>
+				<li class="active"><a href="/admin/sitemap.php">Sitemap List</a></li>
 				<li><a href="/admin/ping.php">Ping Sitemap</a></li>
 				
 			</ul>
 		</div>
 		<div class="col-md-10 content">
-
-<title>XML Sitemap Generator</title>
-<h2>Sitemap Creator Manual</h2>
- 
-<form method="post" action="file.php" target="_blank">
- 
- 
-<tr>
- 
-<td>Url</td>
- 
- 
- <input class="form-control" type="text" name="url" size="80">
- 
- </tr>
- 
- 
-<tr>
- 
-<td>Priority</td>
- 
- 
- 
- <input class="form-control" type="text" value="0.8" name="priority">
- 
- </tr>
- 
- 
-<tr>
- 
-<td>Change Frequently</td>
- 
- 
- <select class="form-control" name="changefreq">
-<option value="always">always</option>
-<option value="hourly">hourly</option>
-<option value="daily" selected>daily</option>
-<option value="weekly">weekly</option>
-<option value="monthly">monthly</option>
-<option value="yearly">yearly</option>
-<option value="never">never</option>
- </select>
- 
- </tr>
- 
- 
-<tr>
- 
-<td>Keyword</td>
- 
- 
-<textarea class="form-control" name="keyword" cols=50 rows=30></textarea>
- 
- </tr>
- 
- <br>
-<tr>
-<td colspan=2><button class="btn btn-primary" type="submit" name="submit">Submit</button></td>
-</tr>
- 
- 
- </form>
- 
+    <div class="row custyle">
+        <div class="table-responsive panel panel-primary filterable">
+            <table class="table table-striped custab">
+                <thead>
+                    <tr class="filters">
+                        <th><input type="text" class="form-control" placeholder="#" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="Nama File" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="URL Sitemap" disabled></th>
+                        <th><input type="text" class="form-control" placeholder="Path Sitemap" disabled></th>						
+                    </tr>
+                </thead>
+                <tbody>
+				<?php 
+				$array = explode("\n", file_get_contents('../list.txt'));
+                for( $i = 0; $i<count($array); $i++ ) {
+					echo '<tr>
+                        <td>'.$i.'</td>
+                        <td>'.pathinfo($array[$i], PATHINFO_BASENAME).'</td>
+                        <td>'.$array[$i].'</td>
+                        <td>sitemap/'.pathinfo($array[$i], PATHINFO_BASENAME).'</td>
+						</tr>';
+                }				
+				?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 		</div>
 		<footer class="pull-left footer">
 			<p class="col-md-12">

@@ -36,6 +36,11 @@ function text_to_strip($text) { return str_replace(" ", "-", seotext($text)); } 
 		$isi = file_get_contents($robots);
 		$isi .= "Sitemap :".$_POST["url"]."sitemap/sitemap-$acak.xml\n";
 		file_put_contents($robots, $isi);
+		
+		$list = '../list.txt';
+		$listsi = file_get_contents($list);
+		$listsi .= $_POST["url"]."sitemap/sitemap-$acak.xml\n";
+		file_put_contents($list, $listsi);		
         echo $_POST["url"]."sitemap/sitemap-$acak.xml";		
 		exit;
 	}
