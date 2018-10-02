@@ -1,25 +1,8 @@
 <?php
-error_reporting(0);
 $q = str_replace("-"," ",$_GET["q"]);
-if (empty($q)) {
-$q = 'Mobil';	
-}
-$set_get = file_get_contents('./settings.json');
-$set = json_decode($set_get, true);
-$token_ekomobi = $set['token'];
-//URL Encode Percent from php.com
-function myUrlEncode($string) {
-    $entities = array('%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%2B', '%24', '%2C', '%2F', '%3F', '%25', '%23', '%5B', '%5D');
-    $replacements = array('!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "+", "$", ",", "/", "?", "%", "#", "[", "]");
-    return str_replace($entities, $replacements, urlencode($string));
-}
-//Bukalapax
-$bl_get = file_get_contents('https://api.bukalapak.com/v2/products.json?keywords='.myUrlEncode($q));
-$bl_array = json_decode($bl_get, true);
-//Tokopedia
-$tp_get = file_get_contents('https://ace.tokopedia.com/search/product/v3?scheme=https&device=desktop&related=true&_catalog_rows=0&catalog_rows=0&_rows=0&source=search&ob=23&st=product&rows=11&q='.myUrlEncode($q).'&unique_id=32a89e84dc3a46c893ebce3626caaff5');
-$tp_array = json_decode($tp_get, true);
-//Excerpt
+$json_get = file_get_contents('https://api.ecotrackings.com/api/v3/products?token=jtOD4qKnccctQrsDPZPbd&currency=idr&keyword='.$q);
+$json_array = json_decode($json_get, true);
+$data_loop = count($json_array['data']) - 1 ;
 function getExcerpt($text, $numb)
 {
     $text = strip_tags($text);
@@ -30,12 +13,16 @@ function getExcerpt($text, $numb)
     }
     return $text;
 }
-//Text to Rupiah
 function rupiah($angka){
 	$hasil_rupiah = "Rp " . number_format($angka,0,',','.');
 	return $hasil_rupiah;
 }
-//Spintax 
+/**
+ * Spintax - A helper class to process Spintax strings.
+ * @name Spintax
+ * @author Jason Davis - https://www.codedevelopr.com/
+ * Tutorial: https://www.codedevelopr.com/articles/php-spintax-class/
+ */
 class Spintax
 {
     public function process($text)
@@ -53,16 +40,15 @@ class Spintax
         return $parts[array_rand($parts)];
     }
 }
-//Meta Desc
+
 $spintax = new Spintax();
-$string = $set['meta'];
-//JSON SET
+$string = '{jual|menjual} '.ucwords($q).' {dengan|bersama|dgn} {tarif|bayaran|biaya|harga} paling murah dan {gratis|free|cuma-cuma} {belanja|biaya|ongkos} {bingkis|kirim} ke {seluruhnya|semua|seluruh} Indonesia. {beli|bayar|belanja} '.ucwords($q).' via Bukalapak atau {lagi|berulang|juga|kembali|masih|pula|sedang|semula|serta|tambah|tengah|terus|pun} Tokopedia {dengan|bersama|dgn} {tiket|ticket|kupon|karcis} {diskon|potongan harga|discount|disc} {khusus|kusus|husus} {gratis|free|cuma-cuma} {ongkir|ongkos kirim} '.ucwords($q);
 ?>
 <?php
 	// define the path and name of cached file
 	$cachefile = './cache/'.$q.'.php';
 	// define how long we want to keep the file in seconds. I set mine to 5 hours.
-	$cachetime = 18000;
+	$cachetime = 86400; // cache 1 hari
 	// Check if the cached file is still fresh. If it is, serve it up and exit.
 	if (file_exists($cachefile) && time() - $cachetime < filemtime($cachefile)) {
    	include($cachefile);
@@ -88,7 +74,7 @@ $string = $set['meta'];
 <meta property="og:image:width" content="640" />
 <meta property="og:image:height" content="640" />
 <!------ Meta TAG  ---------->
-<title><?php echo(ucwords($q))?> - <?php echo($set['nama']); ?></title>
+<title><?php echo(ucwords($q))?> - Foss Ecomobi AGC</title>
 <script async='async' src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script async='async' src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 <script async='async' src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
@@ -98,7 +84,27 @@ $string = $set['meta'];
 <!-- A grey horizontal navbar that becomes vertical on small screens -->
 <nav class="navbar navbar-expand-md bg-dark navbar-dark">
   <!-- Brand -->
-  <a class="navbar-brand" href="./"><?php echo($set['nama']); ?></a>
+  <a class="navbar-brand" href="./">Foss Ecomobi AGC</a>
+
+  <!-- Toggler/collapsibe Button -->
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <!-- Navbar links -->
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li> 
+    </ul>
+  </div> 
 </nav>
 <div class="container">
     <br/>
@@ -123,7 +129,6 @@ $string = $set['meta'];
                         <!--end of col-->
                     </div>
 </div>
-<br>
 <div class="container">
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -134,43 +139,35 @@ $string = $set['meta'];
 </nav>
 <div class="row py-4">
 <?php
-	for ($x = 0; $x <= 12; $x++) {	
-	if (!empty($bl_array['products'][$x]['name'])) {
+	for ($x = 0; $x <= $data_loop; $x++) {
+if (empty($json_array['data'][$x]['product_discounted']))
+	{
+	$hargadiskon = rupiah($json_array['data'][$x]['product_price']);
+	$diskon = ' ';
+	}
+  else
+	{
+	$hargadiskon = rupiah($json_array['data'][$x]['product_discounted']);
+	$diskon = '<del class="price-old">'.rupiah($json_array['data'][$x]['product_price']).'</del>';
+	}
+	
 	echo '<div class="col-md-4">
 	<figure class="card card-product">
 		<div class="img-wrap">
-<img class = "lazy" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://i'.mt_rand(0, 3).'.wp.com/'.str_replace( 'https://', '', $bl_array['products'][$x]['images'][0] ).'" alt="Gambar Untuk '.ucwords($bl_array['products'][$x]['name']).'"></div>
+<img class = "lazy" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="http://i'.mt_rand(0, 3).'.wp.com/'.str_replace( 'https://', '', $json_array['data'][$x]['product_picture'] ).'" alt="Gambar Untuk '.$json_array['data'][$x]['product_name'].'"></div>
 		<figcaption class="info-wrap">
-				<h4 class="title">'.getExcerpt(ucwords($bl_array['products'][$x]['name']), 40).'</h4>
-				<p class="desc">Produk ini Dijual Di : Bukalapak</p>
+				<h4 class="title">'.getExcerpt(ucwords($json_array['data'][$x]['product_name']), 40).'</h4>
+				<p class="desc">Produk ini Dijual Di : '.$json_array['data'][$x]['advertiser_name'].'<br>
+								Termasuk Kategori : '.$json_array['data'][$x]['category_name'].'</</p>
 		</figcaption>
 		<div class="bottom-wrap">
-				<a href="https://go.ecotrackings.com/?token='.$token_ekomobi.'&url='.myUrlEncode($bl_array['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
+				<a href="'.$json_array['data'][$x]['tracking_link'].'" class="btn btn-sm btn-primary float-right">Order Now</a>	
 				<div class="price-wrap h5">
-					<span class="price-new">'.rupiah($bl_array['products'][$x]['price']).'</span>
+					<span class="price-new">'.$hargadiskon.'</span> '.$diskon.' 
 				</div> <!-- price-wrap.// -->
 		</div> <!-- bottom-wrap.// -->
 	</figure>
 </div> <!-- col // -->';
-	}	
-	if (!empty($tp_array['data']['products'][$x]['name'])) {
-	echo '<div class="col-md-4">
-	<figure class="card card-product">
-		<div class="img-wrap">
-<img class = "lazy" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://i'.mt_rand(0, 3).'.wp.com/'.str_replace( 'https://', '', $tp_array['data']['products'][$x]['image_url']).'" alt="Gambar Untuk '.ucwords($tp_array['data']['products'][$x]['name']).'"></div>
-		<figcaption class="info-wrap">
-				<h4 class="title">'.getExcerpt(ucwords($tp_array['data']['products'][$x]['name']), 40).'</h4>
-				<p class="desc">Produk ini Dijual Di : Tokopedia</p>
-		</figcaption>
-		<div class="bottom-wrap">
-				<a href="https://go.ecotrackings.com/?token=jtOD4qKnccctQrsDPZPbd&url='.myUrlEncode($tp_array['data']['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
-				<div class="price-wrap h5">
-					<span class="price-new">'.$tp_array['data']['products'][$x]['price'].'</span>
-				</div> <!-- price-wrap.// -->
-		</div> <!-- bottom-wrap.// -->
-	</figure>
-</div> <!-- col // -->';
-	}		
 	}
 ?>
 </div> <!-- row.// -->
@@ -245,6 +242,7 @@ html {scroll-behavior:smooth;}
 .ignielToTop:hover {background:#1d2129 url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z' fill='%23fff'/%3E%3C/svg%3E") no-repeat center center;}
 </style>
 </body>
+	
 <?php
 	// We're done! Save the cached content to a file
 	$fp = fopen($cachefile, 'w');

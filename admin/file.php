@@ -41,7 +41,26 @@ function text_to_strip($text) { return str_replace(" ", "-", seotext($text)); } 
 		$listsi = file_get_contents($list);
 		$listsi .= $_POST["url"]."sitemap/sitemap-$acak.xml\n";
 		file_put_contents($list, $listsi);		
-        echo $_POST["url"]."sitemap/sitemap-$acak.xml";		
+        echo $_POST["url"]."sitemap/sitemap-$acak.xml";	
+        // load the data and delete the line from the array
+        $lines = file('../sitemap.xml');
+        $last = sizeof($lines) - 1 ;
+        unset($lines[$last]);
+        // write the new data to the file
+        $fp = fopen('../sitemap.xml', 'w');
+        fwrite($fp, implode('', $lines));
+        fclose($fp); 
+		
+		$index = '../sitemap.xml';
+		$indexsi = file_get_contents($index);
+		$indexsi .= "<sitemap>
+      <loc>".$_POST['url']."sitemap/sitemap-$acak.xml</loc>
+   </sitemap>
+      </sitemapindex>";
+   		file_put_contents($index, $indexsi);		
+
+		
+
 		exit;
 	}
 	?>
