@@ -83,6 +83,7 @@ ask($_POST["url"]);
 	<div class="container-fluid main-container">
 		<div class="col-md-2 sidebar">
 			<ul class="nav nav-pills nav-stacked">
+				<li><a href="/admin/home.php">Home</a></li>									
 				<li><a href="/admin/">Sitemap Maker</a></li>
 				<li ><a href="/admin/sitemap.php">Sitemap List</a></li>
 				<li class="active"><a href="/admin/ping.php">Ping Sitemap</a></li>
