@@ -7,6 +7,9 @@ $q = 'Mobil';
 $set_get = file_get_contents('./settings.json');
 $set = json_decode($set_get, true);
 $token_ekomobi = $set['token'];
+$head = $set['head'];
+$body = $set['body'];
+
 //URL Encode Percent from php.com
 function myUrlEncode($string) {
     $entities = array('%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%2B', '%24', '%2C', '%2F', '%3F', '%25', '%23', '%5B', '%5D');
@@ -14,10 +17,10 @@ function myUrlEncode($string) {
     return str_replace($entities, $replacements, urlencode($string));
 }
 //Bukalapax
-$bl_get = file_get_contents('https://api.bukalapak.com/v2/products.json?keywords='.myUrlEncode($q));
+$bl_get = file_get_contents('https://api.bukalapak.com/v2/products.json?keywords='.rawurlencode($q));
 $bl_array = json_decode($bl_get, true);
 //Tokopedia
-$tp_get = file_get_contents('https://ace.tokopedia.com/search/product/v3?scheme=https&device=desktop&related=true&_catalog_rows=0&catalog_rows=0&_rows=0&source=search&ob=23&st=product&rows=11&q='.myUrlEncode($q).'&unique_id=32a89e84dc3a46c893ebce3626caaff5');
+$tp_get = file_get_contents('https://ace.tokopedia.com/search/product/v3?scheme=https&device=desktop&related=true&_catalog_rows=0&catalog_rows=0&_rows=0&source=search&ob=23&st=product&rows=11&q='.rawurlencode($q).'&unique_id=32a89e84dc3a46c893ebce3626caaff5');
 $tp_array = json_decode($tp_get, true);
 //Excerpt
 function getExcerpt($text, $numb)
@@ -55,8 +58,10 @@ class Spintax
 }
 //Meta Desc
 $spintax = new Spintax();
-$string = $set['meta'];
+$sepintax = $set['meta'];
+$string = str_replace("[KEYWORD]",$q,$sepintax);
 //JSON SET
+
 ?>
 <?php
 	// define the path and name of cached file
@@ -74,8 +79,10 @@ $string = $set['meta'];
 <!DOCTYPE html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<html lang="id-ID" prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
+<html lang="id-ID" prefix="og:http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
 <meta charset="UTF-8">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="description" content="<?php echo(ucwords($spintax->process($string)))?>"/>
@@ -84,17 +91,19 @@ $string = $set['meta'];
 <meta name="language" content="id" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="<?php echo(strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https://'?'https://':'http://'.$_SERVER['HTTP_HOST'])?>" />
-<meta property="og:image" content="https://guestbackyard.com/assets/images/icon.png" />
+<meta property="og:image" content="/og_image.png" />
 <meta property="og:image:width" content="640" />
 <meta property="og:image:height" content="640" />
 <!------ Meta TAG  ---------->
-<title><?php echo(ucwords($q))?> - <?php echo($set['nama']); ?></title>
+<title><?php echo(ucwords($q));?> - <?php echo($set['nama']); ?></title>
 <script async='async' src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script async='async' src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 <script async='async' src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 <!------ Include the above in your HEAD tag ---------->
+<?php echo($head);?>
 </head>
 <body>
+<?php echo($body);?>
 <!-- A grey horizontal navbar that becomes vertical on small screens -->
 <nav class="navbar navbar-expand-md bg-dark navbar-dark">
   <!-- Brand -->
@@ -145,7 +154,7 @@ $string = $set['meta'];
 				<p class="desc">Produk ini Dijual Di : Bukalapak</p>
 		</figcaption>
 		<div class="bottom-wrap">
-				<a href="https://go.ecotrackings.com/?token='.$token_ekomobi.'&url='.myUrlEncode($bl_array['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
+				<a href="https://go.ecotrackings.com/?token='.$token_ekomobi.'&url='.rawurlencode($bl_array['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
 				<div class="price-wrap h5">
 					<span class="price-new">'.rupiah($bl_array['products'][$x]['price']).'</span>
 				</div> <!-- price-wrap.// -->
@@ -163,7 +172,7 @@ $string = $set['meta'];
 				<p class="desc">Produk ini Dijual Di : Tokopedia</p>
 		</figcaption>
 		<div class="bottom-wrap">
-				<a href="https://go.ecotrackings.com/?token=jtOD4qKnccctQrsDPZPbd&url='.myUrlEncode($tp_array['data']['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
+				<a href="https://go.ecotrackings.com/?token='.$token_ekomobi.'&url='.rawurlencode($tp_array['data']['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
 				<div class="price-wrap h5">
 					<span class="price-new">'.$tp_array['data']['products'][$x]['price'].'</span>
 				</div> <!-- price-wrap.// -->
