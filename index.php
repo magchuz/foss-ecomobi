@@ -1,27 +1,22 @@
 <?php
+
 error_reporting(0);
 $q = str_replace("-"," ",$_GET["q"]);
 if (empty($q)) {
 $q = 'Mobil';	
 }
+//Settings
 $set_get = file_get_contents('./settings.json');
 $set = json_decode($set_get, true);
-$token_ekomobi = $set['token'];
-$head = $set['head'];
-$body = $set['body'];
 
-//URL Encode Percent from php.com
-function myUrlEncode($string) {
-    $entities = array('%21', '%2A', '%27', '%28', '%29', '%3B', '%3A', '%40', '%26', '%3D', '%2B', '%24', '%2C', '%2F', '%3F', '%25', '%23', '%5B', '%5D');
-    $replacements = array('!', '*', "'", "(", ")", ";", ":", "@", "&", "=", "+", "$", ",", "/", "?", "%", "#", "[", "]");
-    return str_replace($entities, $replacements, urlencode($string));
-}
 //Bukalapax
 $bl_get = file_get_contents('https://api.bukalapak.com/v2/products.json?keywords='.rawurlencode($q));
 $bl_array = json_decode($bl_get, true);
+
 //Tokopedia
 $tp_get = file_get_contents('https://ace.tokopedia.com/search/product/v3?scheme=https&device=desktop&related=true&_catalog_rows=0&catalog_rows=0&_rows=0&source=search&ob=23&st=product&rows=11&q='.rawurlencode($q).'&unique_id=32a89e84dc3a46c893ebce3626caaff5');
 $tp_array = json_decode($tp_get, true);
+
 //Excerpt
 function getExcerpt($text, $numb)
 {
@@ -33,11 +28,7 @@ function getExcerpt($text, $numb)
     }
     return $text;
 }
-//Text to Rupiah
-function rupiah($angka){
-	$hasil_rupiah = "Rp " . number_format($angka,0,',','.');
-	return $hasil_rupiah;
-}
+
 //Spintax 
 class Spintax
 {
@@ -60,10 +51,8 @@ class Spintax
 $spintax = new Spintax();
 $sepintax = $set['meta'];
 $string = str_replace("[KEYWORD]",$q,$sepintax);
-//JSON SET
+//Caching HTML
 
-?>
-<?php
 	// define the path and name of cached file
 	$cachefile = './cache/'.$q.'.php';
 	// define how long we want to keep the file in seconds. I set mine to 5 hours.
@@ -76,10 +65,11 @@ $string = str_replace("[KEYWORD]",$q,$sepintax);
 	// if there is either no file OR the file to too old, render the page and capture the HTML.
 	ob_start();
 ?>
+
 <!DOCTYPE html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<html lang="id-ID" prefix="og:http://ogp.me/ns# fb: http://ogp.me/ns/fb#">
+<html lang="id-ID" prefix="og:http://ogp.me/ns# fb:http://ogp.me/ns/fb#">
 <meta charset="UTF-8">
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -100,10 +90,10 @@ $string = str_replace("[KEYWORD]",$q,$sepintax);
 <script async='async' src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 <script async='async' src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 <!------ Include the above in your HEAD tag ---------->
-<?php echo($head);?>
+<?php echo $set['head'];;;;; ?>
 </head>
 <body>
-<?php echo($body);?>
+<?php echo($set['body']);?>
 <!-- A grey horizontal navbar that becomes vertical on small screens -->
 <nav class="navbar navbar-expand-md bg-dark navbar-dark">
   <!-- Brand -->
@@ -143,44 +133,42 @@ $string = str_replace("[KEYWORD]",$q,$sepintax);
 </nav>
 <div class="row py-4">
 <?php
-	for ($x = 0; $x <= 12; $x++) {	
-	if (!empty($bl_array['products'][$x]['name'])) {
+foreach ($bl_array['products'] as $produk_bl) {
 	echo '<div class="col-md-4">
 	<figure class="card card-product">
 		<div class="img-wrap">
-<img class = "lazy" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://i'.mt_rand(0, 3).'.wp.com/'.str_replace( 'https://', '', $bl_array['products'][$x]['images'][0] ).'" alt="Gambar Untuk '.ucwords($bl_array['products'][$x]['name']).'"></div>
+<img class = "lazy" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://i'.mt_rand(0, 3).'.wp.com/'.str_replace( 'https://', '', $produk_bl['images'][0] ).'" alt="Gambar Untuk '.ucwords($produk_bl['name']).'"></div>
 		<figcaption class="info-wrap">
-				<h4 class="title">'.getExcerpt(ucwords($bl_array['products'][$x]['name']), 40).'</h4>
+				<h4 class="title">'.getExcerpt(ucwords($produk_bl['name']), 40).'</h4>
 				<p class="desc">Produk ini Dijual Di : Bukalapak</p>
 		</figcaption>
 		<div class="bottom-wrap">
-				<a href="https://go.ecotrackings.com/?token='.$token_ekomobi.'&url='.rawurlencode($bl_array['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
+				<a href="https://go.ecotrackings.com/?token='.$set['token'].'&url='.rawurlencode($produk_bl['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
 				<div class="price-wrap h5">
-					<span class="price-new">'.rupiah($bl_array['products'][$x]['price']).'</span>
+					<span class="price-new">Rp '.number_format($produk_bl['price'],0,',','.').'</span>
 				</div> <!-- price-wrap.// -->
 		</div> <!-- bottom-wrap.// -->
 	</figure>
 </div> <!-- col // -->';
-	}	
-	if (!empty($tp_array['data']['products'][$x]['name'])) {
+    }	
+    foreach ($tp_array['data']['products'] as $produk_tp) {   
 	echo '<div class="col-md-4">
 	<figure class="card card-product">
 		<div class="img-wrap">
-<img class = "lazy" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://i'.mt_rand(0, 3).'.wp.com/'.str_replace( 'https://', '', $tp_array['data']['products'][$x]['image_url']).'" alt="Gambar Untuk '.ucwords($tp_array['data']['products'][$x]['name']).'"></div>
+<img class = "lazy" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://i'.mt_rand(0, 3).'.wp.com/'.str_replace( 'https://', '', $produk_tp['image_url']).'" alt="Gambar Untuk '.ucwords($produk_tp['name']).'"></div>
 		<figcaption class="info-wrap">
-				<h4 class="title">'.getExcerpt(ucwords($tp_array['data']['products'][$x]['name']), 40).'</h4>
+				<h4 class="title">'.getExcerpt(ucwords($produk_tp['name']), 40).'</h4>
 				<p class="desc">Produk ini Dijual Di : Tokopedia</p>
 		</figcaption>
 		<div class="bottom-wrap">
-				<a href="https://go.ecotrackings.com/?token='.$token_ekomobi.'&url='.rawurlencode($tp_array['data']['products'][$x]['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
+				<a href="https://go.ecotrackings.com/?token='.$set['token'].'&url='.rawurlencode($produk_tp['url']).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
 				<div class="price-wrap h5">
-					<span class="price-new">'.$tp_array['data']['products'][$x]['price'].'</span>
+					<span class="price-new">'.$produk_tp['price'].'</span>
 				</div> <!-- price-wrap.// -->
 		</div> <!-- bottom-wrap.// -->
 	</figure>
 </div> <!-- col // -->';
-	}		
-	}
+    }	
 ?>
 </div> <!-- row.// -->
 
@@ -259,6 +247,5 @@ html {scroll-behavior:smooth;}
 	$fp = fopen($cachefile, 'w');
 	fwrite($fp, ob_get_contents());
 	fclose($fp);
-	// finally send browser output
-	ob_end_flush();
+    ob_end_flush();
 ?>
