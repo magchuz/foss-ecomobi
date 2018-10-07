@@ -1,5 +1,4 @@
 <?php
-
 error_reporting(0);
 $q = str_replace("-"," ",$_GET["q"]);
 if (empty($q)) {
@@ -16,6 +15,23 @@ $bl_array = json_decode($bl_get, true);
 //Tokopedia
 $tp_get = file_get_contents('https://ace.tokopedia.com/search/product/v3?scheme=https&device=desktop&related=true&_catalog_rows=0&catalog_rows=0&_rows=0&source=search&ob=23&st=product&rows=11&q='.rawurlencode($q).'&unique_id=32a89e84dc3a46c893ebce3626caaff5');
 $tp_array = json_decode($tp_get, true);
+
+//Shopeh
+
+// Get cURL resource
+$curl = curl_init();
+// Set some options - we are passing in a useragent too here
+curl_setopt_array($curl, array(
+    CURLOPT_RETURNTRANSFER => 1,
+    CURLOPT_URL => 'https://shopee.co.id/api/v2/search_items/?by=relevancy&keyword=mobil&limit=10&newest=0&order=desc&page_type=search',
+    CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'
+
+));
+// Send the request & save response to $resp
+$resp = curl_exec($curl);
+// Close request to clear up some resources
+curl_close($curl);
+$sp_array = json_decode($resp, true);
 
 //Excerpt
 function getExcerpt($text, $numb)
@@ -89,8 +105,10 @@ $string = str_replace("[KEYWORD]",$q,$sepintax);
 <script async='async' src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script async='async' src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 <script async='async' src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<script async='async' src="script.js"></script>
+
 <!------ Include the above in your HEAD tag ---------->
-<?php echo $set['head'];;;;; ?>
+<?php echo $set['head']; ?>
 </head>
 <body>
 <?php echo($set['body']);?>
@@ -169,6 +187,30 @@ foreach ($bl_array['products'] as $produk_bl) {
 	</figure>
 </div> <!-- col // -->';
     }	
+    foreach ($sp_array['items'] as $produk_sp) {   
+$sp_adv = file_get_contents('https://shopee.co.id/api/v2/item/get?itemid='.$produk_sp['itemid'].'&shopid='.$produk_sp['shopid']);
+$sp_advar = json_decode($sp_adv, true);
+$sp_url = "https://shopee.co.id/" . preg_replace('/\s+/', '-',$sp_advar['item']['name']);
+$sp_url = str_replace(array('[[',']]'),'',$sp_url) . "-i.".$sp_advar['item']['shopid'].".".$sp_advar['item']['itemid'];
+
+
+        echo '<div class="col-md-4">
+        <figure class="card card-product">
+            <div class="img-wrap">
+    <img class = "lazy" src="data:image/png;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="https://i'.mt_rand(0, 3).'.wp.com/cf.shopee.co.id/file/'.$sp_advar['item']['image'].'" alt="Gambar Untuk '.ucwords($sp_advar['item']['name']).'"></div>
+            <figcaption class="info-wrap">
+                    <h4 class="title">'.getExcerpt(ucwords($sp_advar['item']['name']), 40).'</h4>
+                    <p class="desc">Produk ini Dijual Di : Shopee</p>
+            </figcaption>
+            <div class="bottom-wrap">
+                    <a href="https://go.ecotrackings.com/?token='.$set['token'].'&url='.rawurlencode($sp_url).'" class="btn btn-sm btn-primary float-right">Order Now</a>	
+                    <div class="price-wrap h5">
+                        <span class="price-new">Rp '.number_format($sp_advar['item']['price_min'] / 100000,0,',','.').'</span>
+                    </div> <!-- price-wrap.// -->
+            </div> <!-- bottom-wrap.// -->
+        </figure>
+    </div> <!-- col // -->';
+        }
 ?>
 </div> <!-- row.// -->
 
@@ -178,69 +220,10 @@ foreach ($bl_array['products'] as $produk_bl) {
 <!--container.//-->
 
 <br><br><br>
-<script>
-function Click() {
-   var spasi = document.getElementById("query").value.replace(/\s+$/, '');	
-   var replaced = spasi.replace(/ /g, '-');
-
-    location.href = './'+replaced;
-}
-// Get the input field
-var input = document.getElementById("query");
-
-// Execute a function when the user releases a key on the keyboard
-input.addEventListener("keyup", function(event) {
-  // Cancel the default action, if needed
-  event.preventDefault();
-  // Number 13 is the "Enter" key on the keyboard
-  if (event.keyCode === 13) {
-    // Trigger the button element with a click
-    document.getElementById("search").click();
-  }
-});
-</script>
-<script type='text/javascript'>//<![CDATA[
-function ignielLazyLoad(){eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--){d[e(c)]=k[c]||e(c)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('u B(){Y(v e=o.1r("B"),t=0;t<e.1q;t++)Q(e[t])&&(e[t].N=e[t].1p("1n-N"))}u Q(e){v t=e.1t();Z t.1x>=0&&t.1w>=0&&t.1v<=(y.1u||o.T.1m)&&t.1k<=(y.1c||o.T.1b)}v b=["\\r\\m\\m\\D\\G\\a\\f\\c\\M\\n\\p\\c\\a\\f\\a\\k","\\h\\f","\\r\\c\\c\\r\\l\\A\\D\\G\\a\\f\\c","\\g\\h\\r\\m","\\p\\l\\k\\h\\g\\g","\\V\\1a\\1e\\R\\h\\f\\c\\a\\f\\c\\M\\h\\r\\m\\a\\m","\\w\\p\\a\\1l\\p\\c\\k\\n\\l\\c","\\r","\\1f\\w\\a\\k\\L\\1j\\a\\g\\a\\l\\c\\h\\k\\W\\g\\g","\\g\\a\\f\\q\\c\\A","\\w\\p\\a\\k\\W\\q\\a\\f\\c","\\c\\a\\p\\c","\\m\\h\\l\\w\\F\\a\\f\\c\\D\\g\\a\\F\\a\\f\\c","\\1i\\h\\m\\L","\\l\\g\\n\\l\\1g","\\p\\l\\k\\h\\g\\g\\1h\\h\\J","\\c\\h\\J","\\q\\a\\c\\S\\h\\w\\f\\m\\n\\f\\q\\R\\g\\n\\a\\f\\c\\1z\\a\\l\\c","\\A\\k\\a\\X","\\a\\1y\\a\\l","\\q\\a\\c\\D\\g\\a\\F\\a\\f\\c\\S\\L\\1F\\m","\\p\\l\\k\\h\\g\\g\\U\\a\\n\\q\\A\\c","\\n\\f\\f\\a\\k\\U\\a\\n\\q\\A\\c","\\J\\k\\a\\G\\a\\f\\c\\V\\a\\X\\r\\w\\g\\c","\\n\\c\\a\\F"];u I(d,j){y[b[0]]?y[b[0]](d,j):y[b[2]](b[1]+d,j)}I(b[3],B),I(b[4],B),o[b[0]](b[5],u(){b[6];Y(v d=o[b[8]](b[7]),j=d[b[9]],s=/1D|1B/i[b[11]](1G[b[10]])?o[b[12]]:o[b[13]],C=u(d,j,s,C){Z(d/=C/2)<1?s/2*d*d*d+j:s/2*((d-=2)*d*d+2)+j};j--;){d[b[1C]](j)[b[0]](b[14],u(d){v j,E=s[b[15]],x=o[b[1A]](/[^#]+$/[b[19]](1H[b[18]])[0])[b[17]]()[b[16]],z=s[b[1d]]-y[b[1s]],O=z>E+x?x:z-E,K=1o,H=u(d){j=j||d;v x=d-j,z=C(x,E,O,K);s[b[15]]=z,K>x&&P(H)};P(H),d[b[1E]]()})}});',62,106,'||||||||||x65|_0x1b5d|x74|_0xdd48x2||x6E|x6C|x6F||_0xdd48x3|x72|x63|x64|x69|document|x73|x67|x61|_0xdd48x4||function|var|x75|_0xdd48x7|window|_0xdd48x8|x68|lazy|_0xdd48x5|x45|_0xdd48x6|x6D|x76|_0xdd48xb|registerListener|x70|_0xdd48xa|x79|x4C|src|_0xdd48x9|requestAnimationFrame|isInViewport|x43|x42|documentElement|x48|x44|x41|x66|for|return|||||||||||x4F|clientWidth|innerWidth|21|x4D|x71|x6B|x54|x62|x53|left|x20|clientHeight|data|900|getAttribute|length|getElementsByClassName|22|getBoundingClientRect|innerHeight|top|right|bottom|x78|x52|20|trident|24|firefox|23|x49|navigator|this'.split('|'),0,{}));} eval(function(p,a,c,k,e,d){e=function(c){return c.toString(36)};if(!''.replace(/^/,String)){while(c--){d[c.toString(a)]=k[c]||c.toString(a)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('j 4=["\\7\\9\\9\\e\\d\\a\\b\\8\\i\\g\\h\\8\\a\\b\\a\\k","\\f\\c\\7\\9","\\7\\8\\8\\7\\m\\l\\e\\d\\a\\b\\8","\\c\\b\\f\\c\\7\\9"];5[4[0]]?5[4[0]](4[1],6,!1):5[4[2]]?5[4[2]](4[1],6):5[4[3]]=6;5[4[0]]?5[4[0]](4[1],6,!1):5[4[2]]?5[4[2]](4[1],6):5[4[3]]=6;',23,23,'||||_0xdfb4|window|ignielLazyLoad|x61|x74|x64|x65|x6E|x6F|x76|x45|x6C|x69|x73|x4C|var|x72|x68|x63'.split('|'),0,{}));
-//]]></script>
 <a href="#" class="ignielToTop"></a>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
-<style>
-.card-product .img-wrap {
-    border-radius: 3px 3px 0 0;
-    overflow: hidden;
-    position: relative;
-    height: 220px;
-    text-align: center;
-}
-.card-product .img-wrap img {
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: cover;
-}
-.card-product .info-wrap {
-    overflow: hidden;
-    padding: 15px;
-    border-top: 1px solid #eee;
-}
-.card-product .bottom-wrap {
-    padding: 15px;
-    border-top: 1px solid #eee;
-}
+<link rel="stylesheet" href="style.css">
 
-.label-rating { margin-right:10px;
-    color: #333;
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.card-product .price-old {
-    color: #999;
-}
-/* Back to Top Pure CSS by igniel.com */
-html {scroll-behavior:smooth;}
-.ignielToTop {width:50px; height:50px; position:fixed; bottom:50px; right: 50px; z-index:99; cursor:pointer; border-radius:100px; transition:all .5s; background:#008c5f url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z' fill='%23fff'/%3E%3C/svg%3E") no-repeat center center;}
-.ignielToTop:hover {background:#1d2129 url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z' fill='%23fff'/%3E%3C/svg%3E") no-repeat center center;}
-</style>
 </body>
 <?php
 	// We're done! Save the cached content to a file
